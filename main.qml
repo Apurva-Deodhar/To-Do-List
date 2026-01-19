@@ -5,26 +5,27 @@ import QtQuick.Layouts 1.15
 ApplicationWindow {
     visible: true
     width: 500
-    height: 500
-    color: "#d4e4fc"
+    height: 400
     title: "To Do List"
+    color: "#d4e4fc"
+
+    ListModel { id: taskModel }
 
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: 20
         spacing: 10
 
-        // HEADING LABEL
         Label {
             text: "TO DO LIST"
             font.pixelSize: 18
-            font.bold: true
+            font.underline: true
             horizontalAlignment: Text.AlignHCenter
             Layout.fillWidth: true
             color: "darkblue"
         }
 
-        // TASK TITLE INPUT
+         // TASK TITLE INPUT
         Rectangle {
             id: titleInput
             property alias text: titleField.text
@@ -95,7 +96,7 @@ ApplicationWindow {
 
         // DATE INPUT
         Rectangle {
-            id: dateTimeInput
+            id: dateInput
             property alias text: dateField.text
             Layout.fillWidth: true
             height: 36
@@ -127,15 +128,13 @@ ApplicationWindow {
             }
         }
 
-        // BUTTON
         RowLayout {
             Layout.fillWidth: true
             spacing: 10
 
-            //add button
             Button {
                 id: addButton
-                text: "Add"
+                text: "Add Task"
                 leftPadding: 10
                 rightPadding: 10
 
@@ -146,88 +145,35 @@ ApplicationWindow {
                 }
                 onClicked: {
                     if (titleInput.text.length === 0) return
-
-                    backend.addTask(
-                        titleInput.text,
-                        descInput.text,
-                        dateTimeInput.text
-                    )
-
+                    backend.addTask(titleInput.text, descInput.text, dateInput.text)
                     titleInput.text = ""
                     descInput.text = ""
-                    dateTimeInput.text = ""
+                    dateInput.text = ""
                 }
             }
 
-            //delete button
             Button {
-                id: deleteButton
-                text: "Delete"
+                id: "taskList"
+                text: "Open Task List"
                 leftPadding: 10
-                rightPadding: 10   
+                rightPadding: 10
 
-                 background: Rectangle {
-                    color: '#bb5c44'
+                background: Rectangle {
+                    color: "#6ab342"
                     border.color: "white"
                     radius: 5
                 }
-                onClicked: {
-                    if (taskList.currentIndex >= 0)
-                        backend.deleteTask(taskList.currentIndex)
-                }
-            }
-
-            //clear all button
-            Button {
-                id: clearButton
-                 text: "Clear All"
-                 leftPadding: 10
-                 rightPadding: 10
-
-                 background: Rectangle {
-                    color: '#f90c08'
-                    border.color: "white"
-                    radius: 5
-                }
-                onClicked: backend.clearTasks()
-            }
-        }
-
-        // TASK LIST
-        ScrollView 
-        {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            clip: true
-            ListView {
-                id: taskList
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                model: taskModel
-
-                delegate: CheckDelegate {
-                    width: ListView.view.width
-                    checked: done
-                    text: title + "\nDescription: " + desc + "\nDate: " + datetime
-                    font.italic: checked
-
-                    onCheckedChanged: {
-                        taskModel.set(index, {
-                            "title": title,
-                            "desc": desc,
-                            "datetime": datetime,
-                            "done": checked
-                        })
-                    }
-                }
+                onClicked: taskListWindow.visible = true
             }
         }
     }
 
-    // MODEL
-    ListModel { id: taskModel }
+    TaskList {
+        id: taskListWindow
+        visible: false
+        taskModel: taskModel
+    }
 
-    // main.py CONNECTION
     Connections {
         target: backend
 
@@ -238,14 +184,6 @@ ApplicationWindow {
                 "datetime": datetime,
                 "done": false
             })
-        }
-
-        function onTaskDeleted(index) {
-            taskModel.remove(index)
-        }
-
-        function onClearAll() {
-            taskModel.clear()
         }
     }
 }

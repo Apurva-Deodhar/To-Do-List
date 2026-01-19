@@ -1,31 +1,38 @@
-//BUTTON ARE NOT DONE WITH COLORS
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 
-ApplicationWindow {
-    visible: true
-    width: 500
-    height: 400
+Window {
+    id: editWindow
+    width: 400
+    height: 300
+    title: "Edit Task"
     color: "#d4e4fc"
-    title: "To Do List"
+    visible: false
+
+    property var taskModel
+    property int editIndex: -1
+
+    function open(index) {
+        editIndex = index
+        titleInput.text = taskModel.get(index).title
+        descInput.text = taskModel.get(index).desc
+        dateInput.text = taskModel.get(index).datetime
+        visible = true
+    }
 
     ColumnLayout {
-        anchors.fill: parent
-        anchors.margins: 20
-        spacing: 10
-
-        // HEADING LABEL
         Label {
-            text: "TO DO LIST"
-            font.pixelSize: 18
+            text: "Edit Task"
+            font.pixelSize: 15
             font.bold: true
             horizontalAlignment: Text.AlignHCenter
             Layout.fillWidth: true
             color: "darkblue"
         }
+        anchors.fill: parent
+        anchors.margins: 20
 
-        // TASK TITLE INPUT
         Rectangle {
             id: titleInput
             property alias text: titleField.text
@@ -59,7 +66,7 @@ ApplicationWindow {
             }
         }
 
-        // TASK DESCRIPTION INPUT
+
         Rectangle {
             id: descInput
             property alias text: descField.text
@@ -94,9 +101,8 @@ ApplicationWindow {
             }
         }
 
-        // DATE INPUT
         Rectangle {
-            id: dateTimeInput
+            id: dateInput
             property alias text: dateField.text
             Layout.fillWidth: true
             height: 36
@@ -127,89 +133,29 @@ ApplicationWindow {
                 onClicked: dateField.forceActiveFocus()
             }
         }
-
-        // BUTTON
-        RowLayout {
-            Layout.fillWidth: true
-
-            Button {
-                text: "Add"
-                onClicked: {
-                    if (titleInput.text.length === 0) return
-
-                    backend.addTask(
-                        titleInput.text,
-                        descInput.text,
-                        dateTimeInput.text
-                    )
-
-                    titleInput.text = ""
-                    descInput.text = ""
-                    dateTimeInput.text = ""
+        Button {
+            id: "saveButton"
+            text: "Save"
+            leftPadding: 10
+            rightPadding: 10
+            anchors.topMargin: 60
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.bottom: parent.bottom                
+            background: Rectangle {
+                color: "#6ab342"
+                border.color: "white"
+                radius: 5
                 }
+            onClicked: {
+                taskModel.set(editIndex, {
+                    title: titleInput.text,
+                    desc: descInput.text,
+                    datetime: dateInput.text,
+                    done: taskModel.get(editIndex).done
+                })
+                
+                editWindow.visible = false
             }
-
-            Button {
-                text: "Delete"
-                onClicked: {
-                    if (taskList.currentIndex >= 0)
-                        backend.deleteTask(taskList.currentIndex)
-                }
-            }
-
-            Button {
-                text: "Clear All"
-                onClicked: backend.clearTasks()
-            }
-        }
-
-        // TASK LIST
-        ListView {
-            id: taskList
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            model: taskModel
-
-            delegate: CheckDelegate {
-                width: ListView.view.width
-                checked: done
-                text: title + "\nDescription: " + desc + "\nDate: " + datetime
-                font.italic: checked
-
-                onCheckedChanged: {
-                    taskModel.set(index, {
-                        "title": title,
-                        "desc": desc,
-                        "datetime": datetime,
-                        "done": checked
-                    })
-                }
-            }
-        }
-    }
-
-    // MODEL
-    ListModel { id: taskModel }
-
-    // BACKEND CONNECTION
-    Connections {
-        target: backend
-
-        function onTaskAdded(title, desc, datetime) {
-            taskModel.append({
-                "title": title,
-                "desc": desc,
-                "datetime": datetime,
-                "done": false
-            })
-        }
-
-        function onTaskDeleted(index) {
-            taskModel.remove(index)
-        }
-
-        function onClearAll() {
-            taskModel.clear()
         }
     }
 }

@@ -1,9 +1,9 @@
 import sys
-from PyQt6.QtCore import QObject, pyqtSignal, pyqtSlot
 from PyQt6.QtGui import QGuiApplication
 from PyQt6.QtQml import QQmlApplicationEngine
+from PyQt6.QtCore import QObject, pyqtSignal, pyqtSlot
 
-class TodoBackend(QObject):
+class Backend(QObject):
     taskAdded = pyqtSignal(str, str, str)
     taskDeleted = pyqtSignal(int)
     clearAll = pyqtSignal()
@@ -24,10 +24,9 @@ if __name__ == "__main__":
     app = QGuiApplication(sys.argv)
 
     engine = QQmlApplicationEngine()
-    backend = TodoBackend()
+    backend = Backend()
     engine.rootContext().setContextProperty("backend", backend)
 
-    #connect to main.qml
     engine.load("main.qml")
     if not engine.rootObjects():
         sys.exit(-1)
