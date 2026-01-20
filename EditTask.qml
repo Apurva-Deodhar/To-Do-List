@@ -1,3 +1,4 @@
+// IF ANOTHER EDIT WINDOW NEEDED TO OPEN INSTAED IN SAME WINDOW
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
